@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     private bool isGrounded;
     private int jumpsRemaining;
     private Animator anim;
+    private bool isDead = false;
     
     // Start is called before the first frame update
     void Start()
@@ -26,6 +27,9 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Se o personagem estiver morto, não executa movimento
+        if (isDead) return;
+        
         Move();
         CheckGrounded();
         
@@ -106,6 +110,42 @@ public class Player : MonoBehaviour
         }
     }
     
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Verifica se colidiu com spike
+        if (collision.gameObject.tag == "Spike")
+        {
+            Debug.Log("Tocou o espinho!");
+            Die();
+        }
+    }
+    
+    void Die()
+    {
+        if (isDead) return; // Evita morrer múltiplas vezes
+        
+        isDead = true;
+        Debug.Log("Personagem morreu!");
+        
+        // Para o movimento do personagem
+        if (rig != null)
+        {
+            rig.linearVelocity = Vector2.zero;
+        }
+        
+        // Para todas as animações
+        if (anim != null)
+        {
+            anim.SetBool("walk", false);
+            anim.SetBool("jump", false);
+        }
+        
+        // Mostra a tela de game over
+        if (GameController.instance != null)
+        {
+            GameController.instance.ShowGameOver();
+        }
+    }
     
     void OnDrawGizmosSelected()
     {
